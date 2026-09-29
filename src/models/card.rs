@@ -1,9 +1,7 @@
-use std::fmt::Display;
+use crate::models::card::card_error::CardError;
 
-use serde::Deserialize;
-use serde::Serialize;
+pub mod card_error;
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
 pub enum Card {
     Two,
     Three,
@@ -20,12 +18,6 @@ pub enum Card {
     Ace,
 }
 
-impl Display for Card {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Hello")
-    }
-}
-
 impl From<Card> for u32 {
     fn from(value: Card) -> Self {
         match value {
@@ -37,38 +29,51 @@ impl From<Card> for u32 {
             Card::Seven => 7,
             Card::Eight => 8,
             Card::Nine => 9,
-            Card::Ten | Card::Jack | Card::Queen | Card::King => 10,
+            Card::Ten => 10,
+            Card::Jack => 10,
+            Card::Queen => 10,
+            Card::King => 10,
             Card::Ace => 11,
+        }
+    }
+}
+
+impl TryFrom<u32> for Card {
+    type Error = CardError;
+
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        match value {
+            2 => Ok(Card::Two),
+            3 => Ok(Card::Three),
+            4 => Ok(Card::Four),
+            5 => Ok(Card::Five),
+            6 => Ok(Card::Six),
+            7 => Ok(Card::Seven),
+            8 => Ok(Card::Eight),
+            9 => Ok(Card::Nine),
+            10 => Ok(Card::Ten), // Jack, Queen and King are lost in translation
+            11 => Ok(Card::Ace),
+            _ => Err(value.into()),
         }
     }
 }
 
 impl From<Card> for usize {
     fn from(value: Card) -> Self {
-        ((value as u32) - 2) as usize
+        (u32::from(value) - 2) as usize
     }
 }
 
-impl From<u32> for Card {
-    fn from(value: u32) -> Self {
-        match value {
-            2 => Card::Two,
-            3 => Card::Three,
-            4 => Card::Four,
-            5 => Card::Five,
-            6 => Card::Six,
-            7 => Card::Seven,
-            8 => Card::Eight,
-            9 => Card::Nine,
-            10 => Card::Ten, // 10 may also be a Jack, Queen or King, but that information is lost in translation.
-            11 => Card::Ace,
-            _ => panic!("value out of bounds for Card"),
-        }
-    }
-}
+impl TryFrom<usize> for Card {
+    type Error = CardError;
 
-impl From<usize> for Card {
-    fn from(value: usize) -> Self {
-        Card::from((value + 2) as u32)
+    fn try_from(value: usize) -> Result<Self, Self::Error> {
+        Card::try_from((value + 2) as u32).map_err(|err| {
+            if let CardError::OutOfRangeU32(_) = err {
+                value.into()
+            } else {
+                err
+            }
+        })
     }
 }

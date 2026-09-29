@@ -1,0 +1,35 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run watchexec",
+            "type": "shell",
+            "command": "cmd",
+            "args": [
+                "/c",
+                "start",
+                "powershell",
+                "-NoExit"
+            ],
+            "problemMatcher": [
+                "$rustc"
+            ],
+            "windows": {
+                "command": "cmd",
+                "args": [
+                    "/c",
+                    "start",
+                    "powershell",
+                    "-NoExit",
+                    "'watchexec -r -c -e rs cargo check'"
+                ]
+            },
+            "presentation": {
+                "reveal": "silent",
+                "panel": "new"
+            },
+        }
+    ]
+}
